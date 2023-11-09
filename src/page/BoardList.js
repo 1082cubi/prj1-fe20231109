@@ -10,17 +10,23 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { objectTraps as asiox } from "immer/src/core/proxy";
-import * as board from "node/repl";
+import { useNavigate } from "react-router-dom";
 
 export function BoardList() {
   const [boardList, setBoardList] = useState(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    asiox
+    axios
       .get("/api/board/list")
       .then((response) => setBoardList(response.data));
   }, []);
+
+  if (boardList === null) {
+    return <Spinner />;
+  }
+
   return (
     <Box>
       <h1>게시물 목록</h1>
@@ -35,16 +41,20 @@ export function BoardList() {
             </Tr>
           </Thead>
           <Tbody>
-            {boardList || <Spinner />}
-            {boardList &&
-              boardList.map((board) => (
-                <Tr>
-                  <Td>{board.id}</Td>
-                  <Td>{board.title}</Td>
-                  <Td>{board.writer}</Td>
-                  <Td>{board.inserted}</Td>
-                </Tr>
-              ))}
+            {boardList.map((board) => (
+              <Tr
+                _hover={{
+                  cursor: "pointer",
+                }}
+                key={board.id}
+                onClick={() => navigate("/board/" + board.id)}
+              >
+                <Td>{board.id}</Td>
+                <Td>{board.title}</Td>
+                <Td>{board.writer}</Td>
+                <Td>{board.inserted}</Td>
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </Box>

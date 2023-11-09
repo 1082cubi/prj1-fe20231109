@@ -1,28 +1,27 @@
 import React, { useState } from "react";
-
 import {
   Box,
   Button,
   FormControl,
   FormLabel,
   Input,
-  list,
   Textarea,
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useNavigate } from "reach - router=dom";
+import { useNavigate } from "react-router-dom";
 
 export function BoardWrite() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [writer, setWriter] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toast = useToast();
-  let navigare = useNavigate();
+  const navigate = useNavigate();
 
-  function hanle() {
+  function handleSubmit() {
+    setIsSubmitting(true);
     axios
       .post("/api/board/add", {
         title,
@@ -31,10 +30,10 @@ export function BoardWrite() {
       })
       .then(() => {
         toast({
-          description: "새 글이 저장되었습니다",
+          description: "새 글이 저장되었습니다.",
           status: "success",
         });
-        navigare("/");
+        navigate("/");
       })
       .catch((error) => {
         console.log(error.response.status);
@@ -55,7 +54,7 @@ export function BoardWrite() {
 
   return (
     <Box>
-      <h1>게시물 작성</h1>;
+      <h1>게시물 작성</h1>
       <Box>
         <FormControl>
           <FormLabel>제목</FormLabel>
@@ -75,7 +74,11 @@ export function BoardWrite() {
             onChange={(e) => setWriter(e.target.value)}
           ></Input>
         </FormControl>
-        <Button isDisbled={isSubmitting} onClick={hanle} colorScheme="blue">
+        <Button
+          isDisabled={isSubmitting}
+          onClick={handleSubmit}
+          colorScheme="blue"
+        >
           저장
         </Button>
       </Box>
