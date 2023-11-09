@@ -6,14 +6,21 @@ import {
   FormControl,
   FormLabel,
   Input,
+  list,
   Textarea,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useNavigate } from "reach - router=dom";
 
 export function BoardWrite() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [writer, setWriter] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState();
+
+  const toast = useToast();
+  let navigare = useNavigate();
 
   function hanle() {
     axios
@@ -22,9 +29,28 @@ export function BoardWrite() {
         content,
         writer,
       })
-      .then(() => console.log("잘됨"))
-      .catch(() => console.log("안됨"))
-      .finally(() => console.log("끝"));
+      .then(() => {
+        toast({
+          description: "새 글이 저장되었습니다",
+          status: "success",
+        });
+        navigare("/");
+      })
+      .catch((error) => {
+        console.log(error.response.status);
+        if (error.response.status === 400) {
+          toast({
+            description: "작성한 내용을 확인해주세요.",
+            status: "error",
+          });
+        } else {
+          toast({
+            description: "저장 중에 문제가 발생하였습니다.",
+            status: "error",
+          });
+        }
+      })
+      .finally(() => setIsSubmitting(false));
   }
 
   return (
@@ -49,7 +75,7 @@ export function BoardWrite() {
             onChange={(e) => setWriter(e.target.value)}
           ></Input>
         </FormControl>
-        <Button onClick={hanle} colorScheme="blue">
+        <Button isDisbled={isSubmitting} onClick={hanle} colorScheme="blue">
           저장
         </Button>
       </Box>
