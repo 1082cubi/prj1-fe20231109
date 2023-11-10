@@ -5,10 +5,12 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input, useToast,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export function MemberSignup() {
   const [id, setId] = useState("");
@@ -17,11 +19,12 @@ export function MemberSignup() {
   const [email, setEmail] = useState("");
   const [idAvalable, setIdAvalable] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState(false);
+
   const toast = useToast();
+  const navigate = useNavigate();
   let submitAvailable = true;
 
-  if(emailAvailable) {
-    
+  if (emailAvailable) {
   }
   if (!idAvalable) {
     submitAvailable = false;
@@ -42,9 +45,26 @@ export function MemberSignup() {
         password,
         email,
       })
-      .then(() => console.log("good"))
-      .catch(() => console.log("bad"))
-      .finally(() => console.log("done"));
+      .then(() => {
+        toast({
+          description: "회원가입이 완료되었습니다",
+          status: "success",
+        });
+        navigate("/");
+      })
+      .catch((error) => {
+        if (error.response.status === 400) {
+          toast({
+            description: "입력값을 확인해주세요",
+            status: "error",
+          });
+        } else {
+          toast({
+            description: "가입 중에 오류가 발생하였습니다",
+            status: "error",
+          });
+        }
+      });
   }
 
   function handleIdCheck() {
@@ -65,31 +85,34 @@ export function MemberSignup() {
           setIdAvalable(true);
           toast({
             description: "사용 가능한 아이디입니다",
-            status:"success",
+            status: "success",
           });
         }
       });
   }
 
   function handleEmaliCheck() {
-    const params =new URLSearchParams();
-    params.set("email",email);
-    
-    axios.get("/api/member/check?" + params)
+    const params = new URLSearchParams();
+    params.set("email", email);
+
+    axios
+      .get("/api/member/check?" + params)
       .then(() => {
+        setEmailAvailable(false);
         toast({
           description: "이미 사용중인 email입니다",
-          status: "warning"
-        })
-      })
-      .catch(error => {
-        setEmailAvailable(true);
-        toast({
-          description: "사용 가능한 email입니다",
-          status: "success",
+          status: "warning",
         });
-
       })
+      .catch((error) => {
+        if (error.response.status === 404) {
+          setEmailAvailable(true);
+          toast({
+            description: "사용 가능한 email입니다",
+            status: "success",
+          });
+        }
+      });
   }
 
   return (
@@ -130,15 +153,15 @@ export function MemberSignup() {
       <FormControl isInvalid={!emailAvailable}>
         <FormLabel>email</FormLabel>
         <Flex>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => {
-            setEmailAvailable(false);
-            setEmail(e.target.value)
-          }}
-        />
-        <Button onClick={handleEmaliCheck}>중복체크</Button>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmailAvailable(false);
+              setEmail(e.target.value);
+            }}
+          />
+          <Button onClick={handleEmaliCheck}>중복체크</Button>
         </Flex>
       </FormControl>
       <Button
