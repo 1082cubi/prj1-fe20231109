@@ -26,7 +26,7 @@ const routes = createBrowserRouter(
       <Route path="member/list" element={<MemberList />} />
       <Route path="member" element={<MemberView />} />
       <Route path="member/edit" element={<MemberEdit />} />
-    </Route>,
+    </Route>,z
   ),
 );
 function App(props) {
